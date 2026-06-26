@@ -1,5 +1,9 @@
 # FlowReview
 
+[![CI](https://github.com/borjadev/flow-review/actions/workflows/ci.yml/badge.svg)](https://github.com/borjadev/flow-review/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue.svg)
+
 > AI-assisted classification of incoming support requests, with a human always in
 > the loop. The AI proposes; a person reviews, corrects, approves or rejects. The
 > human decision always wins, and every action is auditable.
