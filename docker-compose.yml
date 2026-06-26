@@ -1,0 +1,50 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: flowreview
+      POSTGRES_PASSWORD: flowreview
+      POSTGRES_DB: flowreview
+    ports:
+      # Published on 5433 to avoid clashing with a local PostgreSQL on 5432.
+      # Inter-container traffic uses the compose network (db:5432) regardless.
+      - '5433:5432'
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U flowreview']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+    environment:
+      NODE_ENV: production
+      API_PORT: '4000'
+      DATABASE_URL: postgresql://flowreview:flowreview@db:5432/flowreview?schema=public
+      CORS_ORIGIN: http://localhost:8090
+      AI_PROVIDER: fake
+      # Seed the database with demo data on startup (idempotent: clears + recreates).
+      SEED: 'true'
+    ports:
+      - '4000:4000'
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/web.Dockerfile
+      args:
+        VITE_API_BASE_URL: http://localhost:4000/api
+    ports:
+      - '8090:80'
+    depends_on:
+      - api
+
+volumes:
+  db-data:
