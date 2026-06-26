@@ -28,12 +28,21 @@ written to an audit trail.
 
 ## 2. Screenshots
 
-> _Placeholder — add screenshots/GIFs here._
->
-> - `docs/images/request-list.png` — request list with filters and status badges
-> - `docs/images/request-details.png` — original request + AI proposal + routing
-> - `docs/images/review-panel.png` — review panel showing proposed vs corrected
-> - `docs/images/audit-timeline.png` — audit timeline
+**Request list** — filters, color-coded status and priority badges, target department per request:
+
+![Request list](docs/images/request-list.png)
+
+**Request details** — original request, AI proposal with confidence, routing, history and review panel side by side:
+
+![Request details](docs/images/request-details.png)
+
+**Review panel** — the reviewer can correct any field; modified values are highlighted against the AI proposal:
+
+<p align="center"><img src="docs/images/review-panel.png" alt="Review panel" width="380"></p>
+
+**Audit timeline** — every action is recorded with its actor and timestamp:
+
+<p align="center"><img src="docs/images/audit-timeline.png" alt="Audit timeline" width="420"></p>
 
 ## 3. Demo flow
 
