@@ -1,0 +1,26 @@
+{
+  "name": "flow-review",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI-assisted support request classification with human-in-the-loop review",
+  "license": "MIT",
+  "packageManager": "pnpm@10.33.1",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "pnpm -r --parallel run dev",
+    "build": "pnpm -r run build",
+    "test": "pnpm -r run test",
+    "lint": "pnpm -r run lint",
+    "typecheck": "pnpm -r run typecheck",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
+    "db:migrate": "pnpm --filter @flow-review/api run db:migrate",
+    "db:seed": "pnpm --filter @flow-review/api run db:seed",
+    "db:generate": "pnpm --filter @flow-review/api run db:generate"
+  },
+  "devDependencies": {
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
+  }
+}
