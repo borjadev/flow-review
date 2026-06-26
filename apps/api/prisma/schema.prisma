@@ -1,0 +1,146 @@
+// FlowReview persistence schema.
+// Prisma is confined to the infrastructure layer; domain entities are mapped
+// explicitly to/from these models (no Prisma types cross the boundary).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RequestStatus {
+  SUBMITTED
+  ANALYSING
+  AWAITING_REVIEW
+  APPROVED
+  REJECTED
+  CLASSIFICATION_FAILED
+}
+
+enum Category {
+  BILLING
+  TECHNICAL_SUPPORT
+  ACCOUNT
+  SALES
+  LEGAL
+  GENERAL
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum Department {
+  FINANCE
+  TECHNICAL_SUPPORT
+  CUSTOMER_SUCCESS
+  SALES
+  LEGAL_OPERATIONS
+  GENERAL_SUPPORT
+}
+
+enum ReviewDecisionType {
+  APPROVED
+  REJECTED
+}
+
+enum AuditEventType {
+  REQUEST_CREATED
+  CLASSIFICATION_STARTED
+  CLASSIFICATION_COMPLETED
+  CLASSIFICATION_FAILED
+  CLASSIFICATION_APPROVED
+  CLASSIFICATION_APPROVED_WITH_CHANGES
+  CLASSIFICATION_REJECTED
+  CLASSIFICATION_RETRIED
+}
+
+model User {
+  id              String           @id
+  name            String
+  email           String
+  role            String
+  createdAt       DateTime         @default(now())
+  createdRequests SupportRequest[] @relation("RequestCreatedBy")
+  reviews         ReviewDecision[]
+
+  @@map("users")
+}
+
+model SupportRequest {
+  id             String        @id
+  requesterName  String
+  requesterEmail String
+  subject        String
+  description    String
+  status         RequestStatus
+  createdById    String
+  createdBy      User          @relation("RequestCreatedBy", fields: [createdById], references: [id])
+  createdAt      DateTime
+  updatedAt      DateTime
+
+  latestAnalysisId String?     @unique
+  latestAnalysis   AIAnalysis? @relation("LatestAnalysis", fields: [latestAnalysisId], references: [id])
+
+  analyses    AIAnalysis[]     @relation("RequestAnalyses")
+  reviews     ReviewDecision[]
+  auditEvents AuditEvent[]
+
+  @@index([status])
+  @@map("support_requests")
+}
+
+model AIAnalysis {
+  id                String         @id
+  requestId         String
+  request           SupportRequest @relation("RequestAnalyses", fields: [requestId], references: [id], onDelete: Cascade)
+  category          Category
+  priority          Priority
+  department        Department
+  summary           String
+  suggestedResponse String
+  confidenceScore   Float
+  provider          String
+  model             String
+  createdAt         DateTime
+
+  latestOf SupportRequest? @relation("LatestAnalysis")
+
+  @@index([requestId])
+  @@map("ai_analyses")
+}
+
+model ReviewDecision {
+  id                     String             @id
+  requestId              String
+  request                SupportRequest     @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  reviewerId             String
+  reviewer               User               @relation(fields: [reviewerId], references: [id])
+  decision               ReviewDecisionType
+  comment                String?
+  originalClassification Json?
+  finalClassification    Json?
+  createdAt              DateTime
+
+  @@index([requestId])
+  @@map("review_decisions")
+}
+
+model AuditEvent {
+  id         String         @id
+  requestId  String
+  request    SupportRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  eventType  AuditEventType
+  actorId    String?
+  payload    Json
+  occurredAt DateTime
+
+  @@index([requestId, occurredAt])
+  @@map("audit_events")
+}
